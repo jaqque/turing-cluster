@@ -25,6 +25,7 @@ dd_args="of=$drive bs=4M conv=fsync status=progress"
 if [[ -f $img.img ]]; then
 	# use uncompressed image, if available
 	echo "==> About ten(10) minutes"
+	stat -c '%s bytes target' $img.img
 	sudo dd if=$img.img $dd_args
 else
 	echo "==> About fifteen(15) minutes"
