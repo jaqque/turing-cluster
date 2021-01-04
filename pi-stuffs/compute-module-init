@@ -1,0 +1,111 @@
+#!/bin/bash
+
+# TODO: command line args
+
+# bail out if something fails
+set -e
+drive=${drive:-/dev/sda}; # The USB interface keeps swapping around. There should be only one, anyway.
+partition=
+
+cd || exit 1
+
+echo "==> Checking for device."
+[[ -b $drive ]] || sudo rpiboot
+
+[[ -b $drive ]] || { echo "<== $drive is not a block device. Please try again."; ls -l ${drive%?}?; exit 1; }
+
+echo
+echo "==> Copying image to compute module. ($drive)"
+img=2020-08-20-raspios-buster-arm64
+dd_args="of=$drive bs=4M conv=fsync status=progress"
+ 
+# Could re-refactor this to cat the .img or unzip the .zip and pipe to dd
+# Could use sudo -g disk, but that asks for passwords. If there was a clean way around this, most
+# sudo invocations could use -g disk. the (u)mounts cannot, of course.
+if [[ -f $img.img ]]; then
+	# use uncompressed image, if available
+	echo "==> About ten(10) minutes"
+	sudo dd if=$img.img $dd_args
+else
+	echo "==> About fifteen(15) minutes"
+	unzip -p $img.zip | sudo dd $dd_args
+fi
+#time unzip -p 2020-08-20-raspios-buster-arm64.zip | sudo dd of=$drive bs=4M conv=fsync
+# time sudo dd if=2020-08-20-raspios-buster-arm64.img of=$drive bs=4M conv=fsync
+# 0+31958 records in
+# 0+31958 records out
+# 3779067904 bytes (3.8 GB, 3.5 GiB) copied, 714.618 s, 5.3 MB/s
+
+if false; then
+	# there was a data error moving the partitions. not worth the 3MiB recovery.
+echo; echo "==> Moving /dev/sda1 (about a minute)"
+time sudo flock /dev/sda sfdisk -N 1 /dev/sda --move-data <<-EOF
+	/dev/sda1 : start=        2048, size=      524288, type=c
+EOF
+echo; echo "==> Moving /dev/sda2"
+time sudo flock /dev/sda sfdisk -N 2 /dev/sda --move-data <<-EOF
+	/dev/sda2 : start=      526336, size=     6848512, type=83
+EOF
+fi
+
+SECTORS="$(sudo blockdev --getsz $drive)" # 61071360 for the 32GiB CM3+ eMMC
+SECTOR_SIZE="$(sudo blockdev --getss $drive)" # 512
+# the root partition is the second partition, which python uses offsets instead of indexes for arrays
+ROOT_START="$(sudo sfdisk $drive -J | python -c 'import json,sys; data=json.load(sys.stdin); print data["partitiontable"]["partitions"][1]["start"]')"
+size=$(( 10 * 2**(10*3) / SECTOR_SIZE ))  # 10GiB/512 => 20971520
+p4=$(( SECTORS - size )) # p4 start
+p3=$(( p4 - size )) # p3 start
+p2=$(( p3 - ROOT_START )) # p2 size; 532480 is a magic number from the .img itself
+
+# TODO: make sure $p2 isn't smaller than its current size
+
+echo; echo "==> Creating $drive${partition}3,4"
+sudo flock $drive sfdisk $drive --append <<-EOF
+	$drive${partition}3 : start= $p3, size= $size, type=83
+	$drive${partition}4 : start= $p4, size= $size, type=83
+EOF
+
+echo; echo "==> Expanding $drive${partition}2"
+sudo flock $drive sfdisk -N 2 $drive <<-EOF
+	$drive${partition}2 : start= $ROOT_START, size= $p2, type=83
+EOF
+echo; echo "==> Mandatory post-expansion fsck"
+sudo e2fsck -f $drive${partition}2 
+echo; echo "==> Resizing the filesystem"
+sudo resize2fs $drive${partition}2
+
+echo; echo "==> Setting initial options"
+mnt=/mnt
+sudo mount $drive${partition}2 $mnt
+sudo mount $drive${partition}1 $mnt/boot
+sudo mount -o bind /proc $mnt/proc
+sudo mount -o bind /dev $mnt/dev
+
+# 0 is true; 1 is false
+TRUE=0;  # $(true; echo $?)
+FALSE=1; # $(false; echo $?)
+
+echo "--> Boot"; sudo chroot $mnt raspi-config nonint do_boot_behaviour B1
+echo "--> Boot Splash"; sudo chroot $mnt raspi-config nonint do_boot_splash $FALSE
+echo "--> Locale"; sudo chroot $mnt raspi-config nonint do_change_locale en_US.UTF-8
+echo "--> Timezone"; sudo chroot $mnt raspi-config nonint do_change_timezone America/Los_Angeles
+echo "--> Keyboard"; sudo chroot $mnt raspi-config nonint do_configure_keyboard us
+echo "--> GPU RAM"; sudo chroot $mnt raspi-config nonint do_memory_split 16
+	# 16 is the smallest valid amount of GPU RAM
+echo "--> Overscan"; sudo chroot $mnt raspi-config nonint do_overscan $FALSE
+echo "--> SSH"; sudo chroot $mnt raspi-config nonint do_ssh $TRUE
+
+sudo umount $mnt/dev
+sudo umount $mnt/proc
+sudo umount $mnt/boot
+sudo umount $mnt
+
+echo; echo "==> All done!"
+exit
+
+# Original sfidisk --dump
+
+	/dev/sda1 : start=        8192, size=      524288, type=c
+	/dev/sda2 : start=      532480, size=     6848512, type=83
+	/dev/sda3 : start=    19128320, size=    20971520, type=83
+	/dev/sda4 : start=    40099840, size=    20971520, type=83
