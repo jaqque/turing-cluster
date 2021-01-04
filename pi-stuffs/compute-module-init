@@ -4,7 +4,7 @@
 
 # bail out if something fails
 set -e
-drive=${drive:-/dev/sda}; # The USB interface keeps swapping around. There should be only one, anyway.
+drive="$(echo ${drive:-/dev/sd?})"; # The USB interface keeps swapping around. There should be only one, anyway.
 partition=
 
 cd || exit 1
@@ -12,7 +12,12 @@ cd || exit 1
 echo "==> Checking for device."
 [[ -b $drive ]] || sudo rpiboot
 
-[[ -b $drive ]] || { echo "<== $drive is not a block device. Please try again."; ls -l ${drive%?}?; exit 1; }
+until [[ -b $drive ]]; do
+	echo
+	echo "<== $drive is not a block device. Trying again."
+	sleep 2
+	drive="$(echo ${drive%?}?)"
+done
 
 echo
 echo "==> Copying image to compute module. ($drive)"
