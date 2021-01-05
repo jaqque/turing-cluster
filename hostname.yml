@@ -1,0 +1,15 @@
+---
+
+- name: Set hostname to MAC
+  hosts: all
+  gather_facts: false
+
+  tasks:
+    - name: Get MAC
+      shell: /sbin/ethtool -P eth0 | sed -e 's/.* //; s/://g'
+      check_mode: false
+      register: mac
+
+    - name: Set hostname
+      command: hostnamectl set-hostname {{ mac.stdout }}
+      become: true
