@@ -80,6 +80,9 @@ sudo e2fsck -f $drive${partition}2
 echo; echo "==> Resizing the filesystem"
 sudo resize2fs $drive${partition}2
 
+# Set initial hardware(and ssh service)
+# https://github.com/raspberrypi-ui/rc_gui/blob/master/src/rc_gui.c
+
 echo; echo "==> Setting initial options"
 mnt=/mnt
 sudo mount $drive${partition}2 $mnt
