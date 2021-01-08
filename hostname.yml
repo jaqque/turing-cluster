@@ -8,8 +8,20 @@
     - name: Get MAC
       shell: /sbin/ethtool -P eth0 | sed -e 's/.* //; s/://g'
       check_mode: false
+      changed_when: false
       register: mac
 
     - name: Set hostname
       command: hostnamectl set-hostname {{ mac.stdout }}
+      # changed_when: ??
       become: true
+
+    - name: Fix /etc/hosts
+      lineinfile:
+        path: /etc/hosts
+        regexp: '^(127.0.1.1\s+)'
+        line: '\1{{ mac.stdout }}'
+        backrefs: true
+        state: present
+      become: true
+
