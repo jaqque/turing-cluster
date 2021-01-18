@@ -1,0 +1,30 @@
+---
+
+- name: Set up intitial ansible.cfg
+  # isn't this in git anyway?
+  hosts: localhost
+  gather_facts: false
+
+  vars:
+    ansible_cfg: "{{ playbook_dir }}/ansible.cfg"
+
+  tasks:
+    - name: Get upstream ansible.cfg
+      ansible.legacy.uri:
+        url: https://raw.githubusercontent.com/ansible/ansible/v{{ ansible_version.string }}/examples/ansible.cfg
+        dest: '{{ ansible_cfg  }}'
+        creates: '{{ ansible_cfg }}'
+
+    - name: Override defaults
+      community.general.ini_file:
+        path: '{{ ansible_cfg }}'
+        section: '{{ item.section }}'
+        option: '{{ item.option }}'
+        value: '{{ item.value }}'
+        state: present
+      with_items:
+        - { section: defaults, option: forks,           value: 7 }
+        - { section: defaults, option: inventory,       value: inventory }
+        - { section: defaults, option: stdout_callback, value: debug }
+
+
