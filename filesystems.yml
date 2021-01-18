@@ -1,0 +1,32 @@
+---
+
+- name: Create filesystems
+  hosts: all
+
+  gather_facts: false
+
+  vars:
+    fstype: ext4
+    mounts:
+      - { name: cifs, dev: /dev/mmcblk0p3, label: CIFS }
+      - { name: store, dev: /dev/mmcblk0p4, label: STORE }
+
+  tasks:
+    - name: Create filesystems
+      community.general.filesystem:
+        dev: '{{ item.dev }}'
+        fstype: '{{ fstype }}'
+        opts: -L {{ item.label | default(omit) }}
+        state: present
+      become: true
+      with_items: '{{ mounts }}'
+
+    - name: Mount filesystems
+      ansible.posix.mount:
+        path: /srv/glusterfs/{{ item.name }}
+        src: '{{ (item.label is defined) | ternary ( "LABEL=" ~ (item.label|default(omit)), item.dev) }}'
+        fstype: '{{ fstype }}'
+        opts: defaults,noatime
+        state: mounted
+      become: true
+      with_items: '{{ mounts }}'
