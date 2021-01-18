@@ -1,0 +1,51 @@
+---
+
+- name: Poweroff a node
+  hosts: localhost
+  gather_facts: false
+
+  vars_prompt:
+    - name: node
+      prompt: "Which node to poweroff (node)?"
+      private: false
+
+  tasks:
+    - name: Ensure node exists
+      assert:
+        that: hostvars[node]['i2c_mask'] is defined
+        fail_msg: "I have no record for {{ node }}."
+        quiet: true
+
+    - name: Get cluster power status
+      command: i2cget -y 1 0x57 0xf2
+      changed_when: false
+      check_mode: false
+      delegate_to: '{{ (node=="master" or node=="node1") | ternary ("node2", "node1") }}'
+      become: true
+      register: cluster_power_status
+
+    # Ansible and Jinja both lack any bitwise operators. Luckily, (ba)sh does.
+    - name: Get node power status
+      shell: echo $(( {{ cluster_power_status.stdout }} & {{ hostvars[node]['i2c_mask'] }} ))
+      changed_when: false
+      check_mode: false
+      connection: local
+      register: node_power_status
+
+    - block:
+      - name: Powering off {{ node }} (OS)
+        #shutdown: # this is part of community.general, which is not installed
+        command: poweroff
+        become: true
+        ignore_errors: true
+        ignore_unreachable: true
+        delegate_to: '{{ node }}'
+
+      - name: Powering off {{ node }} (Compute Module)
+        command: i2cset -m {{ hostvars[node]['i2c_mask'] }} -y 1 0x57 0xf2 0x00
+        changed_when: true
+        become: true
+        delegate_to: '{{ (node=="master" or node=="node1") | ternary ("node2", "node1") }}'
+
+      #block
+      when: node_power_status.stdout != "0"
