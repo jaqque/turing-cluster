@@ -4,3 +4,4 @@
 - import_playbook: hostname.yml
 - import_playbook: passwd.yml
 - import_playbook: ssh_keys.yml
+- import_playbook: i2c.yml

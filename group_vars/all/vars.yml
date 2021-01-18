@@ -1,3 +1,7 @@
 ---
 
 crypted_password: '{{ vault_crypted_password }}'
+boot_txt: /boot/config.txt
+i2c_dtoverlay: |
+  dtoverlay=i2c1,pins_44_45
+  dtoverlay=i2c-rtc,mcp7940x

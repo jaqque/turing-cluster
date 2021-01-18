@@ -1,0 +1,39 @@
+---
+
+- name: Enable I2C
+  hosts: all
+
+  tasks:
+    - name: Add overlays
+      blockinfile:
+        path: '{{ boot_txt }}'
+        state: present
+        marker: '# {mark} Turing Pi I2C'
+        block: '{{ i2c_dtoverlay }}'
+      become: true
+
+    # This is more fragile than I like.
+    - name: Insert blank line before block marker
+      replace:
+        path: /boot/config.txt
+        regexp: "(?<=.\n)(# BEGIN .*$)"
+        replace: "\n\\1"
+      become: true
+
+    - name: Get I2C status
+      command: raspi-config nonint get_i2c
+      changed_when: false
+      check_mode: false
+      register: get_i2c
+
+    - name: Enable I2C
+      command: raspi-config nonint do_i2c 0
+      when: get_i2c.stdout != "0"
+      changed_when: get_i2c.stdout != "0"
+      become: true
+      notify: Reboot Node
+
+  handlers:
+    - name: Reboot Node
+      reboot:
+      become: true
