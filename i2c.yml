@@ -33,6 +33,12 @@
       become: true
       notify: Reboot Node
 
+    - name: Install I2C Tools
+      package:
+        name: i2c-tools
+        state: present
+      become: true
+
   handlers:
     - name: Reboot Node
       reboot:
