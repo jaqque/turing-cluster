@@ -8,7 +8,7 @@ Requirements
 
 - Turing pi cluster board
 - Compute Modules
-- Imaged Compute Modules
+- [Imaged Compute Modules](pi-stuffs/compute-module-init)
 - Node IPs defined in DNS, `/etc/hosts`, or `~/.ssh/config`
 - ansible 2.10+
 
