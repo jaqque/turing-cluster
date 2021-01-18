@@ -1,0 +1,8 @@
+[ ] make filesystems (ext4? xfs? f2fs?)
+[ ] glusterfs
+[ ] docker
+[ ] swarm
+[ ] ssh authorized keys
+[ ] update pi password
+[ ] adjust sshd config
+
