@@ -9,7 +9,7 @@ node7 i2c_mask=0x20
 [master]
 node1
 
-[slaves]
+[workers]
 node2
 node3
 node4
