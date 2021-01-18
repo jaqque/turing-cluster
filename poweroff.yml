@@ -34,10 +34,8 @@
 
     - block:
       - name: Powering off {{ node }} (OS)
-        #shutdown: # this is part of community.general, which is not installed
-        command: poweroff
+        community.general.shutdown:
         become: true
-        ignore_errors: true
         ignore_unreachable: true
         delegate_to: '{{ node }}'
 
