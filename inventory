@@ -1,10 +1,10 @@
-node1 ansible_host=192.168.1.21 i2c_mask=0x02
-node2 ansible_host=192.168.1.31 i2c_mask=0x04
-node3 ansible_host=192.168.1.23 i2c_mask=0x08
-node4 ansible_host=192.168.1.30 i2c_mask=0x10
-node5 ansible_host=192.168.1.25 i2c_mask=0x80
-node6 ansible_host=192.168.1.8  i2c_mask=0x40
-node7 ansible_host=192.168.1.11 i2c_mask=0x20
+node1 i2c_mask=0x02
+node2 i2c_mask=0x04
+node3 i2c_mask=0x08
+node4 i2c_mask=0x10
+node5 i2c_mask=0x80
+node6 i2c_mask=0x40
+node7 i2c_mask=0x20
 
 [master]
 node1
