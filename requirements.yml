@@ -1,0 +1,14 @@
+---
+
+collections:
+  - name: community.general
+    version: 1.3.4
+
+  # these are dependencies of community.general
+  # https://github.com/ansible-collections/community.general/blob/main/galaxy.yml
+  - name: ansible.netcommon
+    version: 1.4.1
+  - name: community.kubernetes
+    version: 1.1.1
+  - name: google.cloud
+    version: 1.0.1

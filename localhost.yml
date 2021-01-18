@@ -1,7 +1,6 @@
 ---
 
 - name: Set up intitial ansible.cfg
-  # isn't this in git anyway?
   hosts: localhost
   gather_facts: false
 
@@ -33,4 +32,17 @@
         - { section: defaults, option: stdout_callback, value: debug }
         - { section: defaults, option: vault_password_file, value: '{{ ansible_user_dir }}/.ansible-vault-password' }
 
+    - name: Install required collections and roles
+      command:
+        cmd: ansible-galaxy install -r requirements.yml
+        chdir: '{{ playbook_dir }}'
+      changed_when: '"was installed successfully" in galaxy.stdout'
+      register: galaxy
+      #notify: Installed Collections and Roles
 
+  handlers:
+    - name: Installed Collections and Roles
+      debug:
+        msg: '{{ item }}'
+      when: '"was installed successfully" in item'
+      with_items: '{{ galaxy.stdout_lines }}'
