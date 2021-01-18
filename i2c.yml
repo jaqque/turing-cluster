@@ -3,6 +3,8 @@
 - name: Enable I2C
   hosts: all
 
+  gather_facts: false
+
   tasks:
     - name: Add overlays
       blockinfile:
