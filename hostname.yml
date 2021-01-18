@@ -4,23 +4,31 @@
   hosts: all
   gather_facts: false
 
+  pre_tasks:
+    - name: Gathering Facts
+      setup:
+      when: module_setup is not defined
+
   tasks:
-    - name: Get MAC
-      shell: /sbin/ethtool -P eth0 | sed -e 's/.* //; s/://g'
+    - name: Make hostname from MAC address
+      set_fact:
+        hostname: '{{
+          ansible_facts[ ansible_default_ipv4.alias][ "macaddress" ]
+          | regex_replace ("^.* ","")
+          | regex_replace (":","")
+        }}'
       check_mode: false
-      changed_when: false
-      register: mac
 
     - name: Set hostname
-      command: hostnamectl set-hostname {{ mac.stdout }}
-      # changed_when: ??
+      hostname:
+        name: '{{ hostname }}'
       become: true
 
     - name: Fix /etc/hosts
       lineinfile:
         path: /etc/hosts
         regexp: '^(127.0.1.1\s+)'
-        line: '\1{{ mac.stdout }}'
+        line: '\1{{ hostname }}'
         backrefs: true
         state: present
       become: true
