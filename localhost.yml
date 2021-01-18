@@ -8,6 +8,11 @@
   vars:
     ansible_cfg: "{{ playbook_dir }}/ansible.cfg"
 
+  pre_tasks:
+    - name: Gathering Facts
+      setup:
+      when: module_setup is not defined
+
   tasks:
     - name: Get upstream ansible.cfg
       ansible.legacy.uri:
@@ -23,8 +28,9 @@
         value: '{{ item.value }}'
         state: present
       with_items:
-        - { section: defaults, option: forks,           value: 7 }
-        - { section: defaults, option: inventory,       value: inventory }
+        - { section: defaults, option: forks, value: 7 }
+        - { section: defaults, option: inventory, value: inventory }
         - { section: defaults, option: stdout_callback, value: debug }
+        - { section: defaults, option: vault_password_file, value: '{{ ansible_user_dir }}/.ansible-vault-password' }
 
 

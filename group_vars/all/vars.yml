@@ -1,0 +1,3 @@
+---
+
+crypted_password: '{{ vault_crypted_password }}'
