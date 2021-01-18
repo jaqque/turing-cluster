@@ -1,0 +1,12 @@
+---
+
+- name: Install ssh public keys
+  hosts: all
+  gather_facts: false
+
+  tasks:
+    - name: Install keys for pi user
+      authorized_key:
+        user: pi
+        key: '{{ lookup("file", "/home/pi/.ssh/authorized_keys") }}'
+      become: true
