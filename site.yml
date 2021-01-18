@@ -1,0 +1,6 @@
+---
+
+- import_playbook: localhost.yml
+- import_playbook: hostname.yml
+- import_playbook: passwd.yml
+- import_playbook: ssh_keys.yml
