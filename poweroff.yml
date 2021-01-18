@@ -20,7 +20,7 @@
       command: i2cget -y 1 0x57 0xf2
       changed_when: false
       check_mode: false
-      delegate_to: '{{ (node=="master" or node=="node1") | ternary ("node2", "node1") }}'
+      delegate_to: '{{ (node=="node1") | ternary ("node2", "node1") }}'
       become: true
       register: cluster_power_status
 
@@ -45,7 +45,7 @@
         command: i2cset -m {{ hostvars[node]['i2c_mask'] }} -y 1 0x57 0xf2 0x00
         changed_when: true
         become: true
-        delegate_to: '{{ (node=="master" or node=="node1") | ternary ("node2", "node1") }}'
+        delegate_to: '{{ (node=="node1") | ternary ("node2", "node1") }}'
 
       #block
       when: node_power_status.stdout != "0"
