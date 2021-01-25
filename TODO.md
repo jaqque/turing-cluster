@@ -3,6 +3,10 @@
     unknown.
 - [x] glusterfs
 - [ ] docker
+  - [ ] install docker
+  - [ ] enable/run docker
+  - [ ] set up storage driver
+  - [ ] set up logging driver
 - [ ] swarm
 - [x] ssh authorized keys
 - [x] update pi password
