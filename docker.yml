@@ -1,0 +1,55 @@
+---
+
+- name: Install Docker
+  hosts: all
+
+  vars:
+    - docker_apt_key: https://download.docker.com/linux/debian/gpg
+    - docker_group: docker
+
+  tasks:
+    - name: Install pre-requisite packages
+      package:
+        name: '{{ docker_prerequisites }}'
+        state: present
+      become: true
+
+    - name: Install Docker Apt Key
+      apt_key:
+        url: '{{ docker_apt_key }}'
+        state: present
+      become: true
+
+    - name: Add Docker Apt Repository
+      apt_repository:
+        repo: >
+          deb [arch=arm64]
+          https://download.docker.com/linux/debian
+          {{ ansible_distribution_release }}
+          stable
+        filename: docker-ce
+        state: present
+      become: true
+
+    - name: Install Docker Packages
+      package:
+        name: '{{ docker_packages }}'
+        state: present
+      become: true
+
+    - name: Add unprivileged user to Docker's group
+      user:
+        name: '{{ ansible_user_id }}'
+        groups: '{{ docker_group }}'
+        append: true
+      become: true
+      tags: doit
+
+    - name: Enable Docker Services
+      service:
+        name: '{{ item }}'
+        state: started
+        enabled: true
+      with_items:
+        - containerd.service
+        - docker.service

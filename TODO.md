@@ -3,9 +3,10 @@
     unknown.
 - [x] glusterfs
 - [ ] docker
-  - [ ] install docker
-  - [ ] enable/run docker
-  - [ ] set up storage driver
+  - [x] install docker
+  - [x] enable/run docker
+  - [ ] ~~set up storage driver~~ skipped, for now
+  - [ ] set up volume plugin
   - [ ] set up logging driver
 - [ ] swarm
 - [x] ssh authorized keys
