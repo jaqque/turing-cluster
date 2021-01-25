@@ -27,8 +27,7 @@
 
     - name: Mount filesystems
       ansible.posix.mount:
-        path: /data/glusterfs/{{ item.name }}/brick1
-        # https://docs.gluster.org/en/latest/Administrator-Guide/Brick-Naming-Conventions/
+        path: '{{ gluster_path | regex_replace ("%%item%%", item.name) | dirname }}'
         src: '{{ (item.label is defined) | ternary ( "LABEL=" ~ (item.label|default(omit)), item.dev) }}'
         fstype: '{{ fstype }}'
         opts: defaults,noatime

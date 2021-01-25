@@ -9,6 +9,8 @@ i2c_dtoverlay: |
   dtoverlay=i2c-rtc,mcp7940x
 
 # gluster volumes
+# https://docs.gluster.org/en/latest/Administrator-Guide/Brick-Naming-Conventions/
+gluster_path: /data/glusterfs/%%item%%/brick1/brick
 mounts:
   - { name: cifs, dev: /dev/mmcblk0p3, label: CIFS }
   - { name: store, dev: /dev/mmcblk0p4, label: STORE }
