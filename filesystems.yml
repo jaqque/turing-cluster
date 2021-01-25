@@ -34,10 +34,3 @@
         state: mounted
       become: true
       with_items: '{{ mounts }}'
-
-    - name: Create brick volume points
-      file:
-        path: '{{ gluster_path | regex_replace ("%%item%%", item.name) }}'
-        state: directory
-      become: true
-      with_items: '{{ mounts }}'
