@@ -18,6 +18,7 @@ Playbooks
 
 ### Setup
 
+- `docker.yml`: Install and configure Docker-CE
 - `filesystems.yml`: Create underlying filesystems for gluster
 - `gluster.yml`: Create and mount gluster volumes
 - `hostname.yml`: Set hostname of each compute module, based upon MAC
