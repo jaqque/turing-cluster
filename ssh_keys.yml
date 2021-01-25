@@ -8,5 +8,5 @@
     - name: Install keys for pi user
       authorized_key:
         user: pi
-        key: '{{ lookup("file", "/home/pi/.ssh/authorized_keys") }}'
+        key: '{{ lookup("file", lookup("env", "HOME") ~ "/.ssh/authorized_keys") }}'
       become: true

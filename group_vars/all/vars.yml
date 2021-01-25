@@ -1,7 +1,6 @@
 ---
 
 ansible_python_interpreter: /usr/bin/python3
-ansible_user: pi
 crypted_password: '{{ vault_crypted_password }}'
 boot_txt: /boot/config.txt
 i2c_dtoverlay: |

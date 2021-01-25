@@ -10,6 +10,7 @@ Requirements
 - Compute Modules
 - [Imaged Compute Modules](pi-stuffs/compute-module-init)
 - Node IPs defined in DNS, `/etc/hosts`, or `~/.ssh/config`
+- Remote user defined in `~/.ssh/config` or consistent with the controller
 - ansible 2.10+
 
 Playbooks
