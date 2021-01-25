@@ -1,0 +1,88 @@
+---
+
+- name: Create gluster share thingies
+  hosts: all
+  gather_facts: false
+
+  vars:
+    gluster_packages:
+      - glusterfs-client # each system will be a client, as well
+      - glusterfs-server
+
+  pre_tasks:
+    - name: Gathering Facts
+      setup:
+      when: module_setup is not defined
+
+  tasks:
+    - name: Install glusterfs
+      package:
+        name: '{{ gluster_packages }}'
+        state: present
+      become: true
+
+    - name: Enable gluster service
+      service:
+        name: glusterd
+        enabled: true
+        state: started
+      become: true
+
+    - name: Create the pool
+      command:
+        cmd: gluster peer probe {{ inventory_hostname }}
+      become: true
+      register: pool
+      delegate_to: '{{ (inventory_hostname == "node1") | ternary ( "node2", "node1" ) }}'
+      changed_when: '"already in peer list" not in pool.stdout'
+
+    - name: Create volumes
+      command:
+        cmd: >
+          gluster 
+            volume create {{ item.name }}
+            disperse 7 
+            redundancy 3
+            transport tcp
+            {{
+              ansible_play_hosts 
+              | join (
+                  ":" ~ gluster_path | regex_replace ("%%item%%", item.name) ~ " "
+              ) ~ ":" ~ gluster_path | regex_replace ("%%item%%", item.name) 
+            }}
+      # "node1:/path/vol/brick node2:/path/vol/brick"
+      # redundancy 3 is optimal, according to glusterfs
+      become: true
+      run_once: true
+      with_items: '{{ mounts }}'
+      register: volumes
+      changed_when: '"please start the volume to access data" in volumes.stdout'
+      failed_when: >
+        ( volumes.rc != 0 )
+        and ( volumes.rc == 1 and ("Volume " ~ item.name ~ " already exists" not in volumes.stderr) ) 
+
+    - name: Start the gluster volumes
+      command:
+        cmd: gluster volume start '{{ item.name }}'
+      become: true
+      with_items: '{{ mounts }}'
+      run_once: true
+      register: vol_start
+      changed_when: "'volume start: ' ~ item.name ~ ': success' in vol_start.stdout"
+      failed_when: >
+        ( vol_start.rc != 0 )
+        and ( vol_start.rc == 1 and ("Volume " ~ item.name ~ " already started" not in vol_start.stderr) ) 
+
+      #- name: there's more gluster stuff to do and i forgot what it all was
+      #debug:
+      #  msg: do the thing pls
+
+#  no RDMA
+#  looking at dispersed volume
+#  https://docs.gluster.org/en/latest/Administrator-Guide/Setting-Up-Volumes/
+#  can't tell what distributed would add to this
+#  having seven nodes makes it unlikely to have an "optimal" slice size (eg: power of 2)
+#  would like to have replica 2, to survive two nodes being down
+#  this is not mission critical, so it's _fine_
+#  will likely end up going with gluster's suggestion - whatever it might be
+#
