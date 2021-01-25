@@ -6,6 +6,7 @@
   vars:
     - docker_apt_key: https://download.docker.com/linux/debian/gpg
     - docker_group: docker
+    - docker_cfg_path: /etc/docker/daemon.json
 
   tasks:
     - name: Install pre-requisite packages
@@ -37,13 +38,22 @@
         state: present
       become: true
 
+    - name: Set Docker config
+      copy:
+        dest: '{{ docker_cfg_path }}'
+        content: |
+          {
+            "log-driver": "local"
+          }
+      become: true
+      notify: Restart Docker
+
     - name: Add unprivileged user to Docker's group
       user:
         name: '{{ ansible_user_id }}'
         groups: '{{ docker_group }}'
         append: true
       become: true
-      tags: doit
 
     - name: Enable Docker Services
       service:
@@ -53,3 +63,10 @@
       with_items:
         - containerd.service
         - docker.service
+
+  handlers:
+    - name: Restart Docker
+      service:
+        name: docker.service
+        state: restarted
+      become: true

@@ -7,7 +7,7 @@
   - [x] enable/run docker
   - [ ] ~~set up storage driver~~ skipped, for now
   - [ ] set up volume plugin
-  - [ ] set up logging driver
+  - [x] set up logging driver
 - [ ] swarm
 - [x] ssh authorized keys
 - [x] update pi password
