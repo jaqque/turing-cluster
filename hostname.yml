@@ -33,3 +33,11 @@
         state: present
       become: true
 
+    - name: Add nodes to /etc/hosts
+      lineinfile:
+        path: /etc/hosts
+        regexp: '^({{ hostvars[ item ].ansible_default_ipv4.address }}\s+)'
+        line: '{{ hostvars[ item ].ansible_default_ipv4.address }} {{ item }}'
+        state: present
+      become: true
+      with_items: '{{ ansible_play_hosts_all }}' # can't grab IPs of failed hosts
