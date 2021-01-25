@@ -29,9 +29,9 @@ Playbooks
 
 ### Control
 
-- `poweroff.yml`: Turn off arbitrary node
-- `poweron.yml`: Turn on arbitrary node
-- `powerstatus.yml`: Get power status of all nodes
+- `helpers/poweroff.yml`: Turn off arbitrary node
+- `helpers/poweron.yml`: Turn on arbitrary node
+- `helpers/powerstatus.yml`: Get power status of all nodes
 
 Power status requires the master node to be on.
 
