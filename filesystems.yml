@@ -1,17 +1,24 @@
 ---
 
-- name: Create filesystems
+- name: Create gluster filesystems
   hosts: all
 
   gather_facts: false
 
   vars:
-    fstype: ext4
+    fstype: xfs
+    # xfs has fewer issues with extended attributes than ext4 has
     mounts:
       - { name: cifs, dev: /dev/mmcblk0p3, label: CIFS }
       - { name: store, dev: /dev/mmcblk0p4, label: STORE }
 
   tasks:
+    - name: Install XFS
+      package:
+        name: xfsprogs
+        state: present
+      become: true
+
     - name: Create filesystems
       community.general.filesystem:
         dev: '{{ item.dev }}'
@@ -23,7 +30,8 @@
 
     - name: Mount filesystems
       ansible.posix.mount:
-        path: /srv/glusterfs/{{ item.name }}
+        path: /data/glusterfs/{{ item.name }}/brick1
+        # https://docs.gluster.org/en/latest/Administrator-Guide/Brick-Naming-Conventions/
         src: '{{ (item.label is defined) | ternary ( "LABEL=" ~ (item.label|default(omit)), item.dev) }}'
         fstype: '{{ fstype }}'
         opts: defaults,noatime
