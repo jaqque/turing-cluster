@@ -24,3 +24,4 @@
 - [ ] power status accept individual nodes / groups / ranges
   - using --limit is ideal
 - [ ] Improve collection / role reporting
+- [ ] Role-ify the things that could(should) be roles
