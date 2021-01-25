@@ -1,0 +1,39 @@
+---
+
+- name: Upgrade all installed packages
+  hosts: all
+
+  tasks:
+    - name: Upgrade packages
+      apt:
+        name: '*'
+        update_cache: true
+        state: latest
+        autoclean: treu
+        autoremove: true
+      become: true
+
+    - name: Clean apt's cache
+      command: apt-get clean
+      become: true
+
+- name: Reboot
+  hosts: all
+  serial: 1
+
+  tasks:
+    - name: Is a reboot required?
+      stat:
+        path: /var/run/reboot-required
+      register: reboot_required
+      changed_when: reboot_required.stat.exists
+      notify: Reboot
+
+  handlers:
+    # is the node a manager? promote one, demote this
+    # remove node from swarm: docker node update --availability drain worker1
+    # has to be run on a manger node
+    # are the gluster volumes fully healed?
+    - name: Reboot
+      reboot:
+      become: true

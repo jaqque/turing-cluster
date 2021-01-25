@@ -35,5 +35,9 @@ Playbooks
 
 Power status requires the master node to be on.
 
+### Maintenance
+
+- `helpers/package-upgrade.yml`: Upgrade all installed packages
+
 [TODO](TODO.md)
 ===
