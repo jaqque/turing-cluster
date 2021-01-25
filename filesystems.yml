@@ -8,9 +8,6 @@
   vars:
     fstype: xfs
     # xfs has fewer issues with extended attributes than ext4 has
-    mounts:
-      - { name: cifs, dev: /dev/mmcblk0p3, label: CIFS }
-      - { name: store, dev: /dev/mmcblk0p4, label: STORE }
 
   tasks:
     - name: Install XFS
