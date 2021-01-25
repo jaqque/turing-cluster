@@ -1,6 +1,7 @@
 - [x] make filesystems (ext4? xfs? f2fs?)
-  - ext4, as per failure mode tests. ext4 was better than f2fs and btrfs. xfs
-    unknown.
+  - ~~ext4, as per failure mode tests. ext4 was better than f2fs and btrfs. xfs
+    unknown.~~
+  - XFS. Gluster is happier that way. I am happier that way.
 - [x] glusterfs
 - [ ] docker
   - [x] install docker
