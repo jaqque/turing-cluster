@@ -2,15 +2,9 @@
 
 - name: Set up intitial ansible.cfg
   hosts: localhost
-  gather_facts: false
 
   vars:
     ansible_cfg: "{{ playbook_dir }}/ansible.cfg"
-
-  pre_tasks:
-    - name: Gathering Facts
-      setup:
-      when: module_setup is not defined
 
   tasks:
     - name: Get upstream ansible.cfg
@@ -28,6 +22,7 @@
         state: present
       with_items:
         - { section: defaults, option: forks, value: 7 }
+        - { section: defaults, option: gathering, value: smart }
         - { section: defaults, option: inventory, value: hosts }
         - { section: defaults, option: stdout_callback, value: debug }
         - { section: defaults, option: vault_password_file, value: '{{ ansible_user_dir }}/.ansible-vault-password' }

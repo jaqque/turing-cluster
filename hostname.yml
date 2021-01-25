@@ -2,12 +2,6 @@
 
 - name: Set hostname to MAC
   hosts: all
-  gather_facts: false
-
-  pre_tasks:
-    - name: Gathering Facts
-      setup:
-      when: module_setup is not defined
 
   tasks:
     - name: Make hostname from MAC address
