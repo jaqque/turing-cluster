@@ -73,16 +73,12 @@
         ( vol_start.rc != 0 )
         and ( vol_start.rc == 1 and ("Volume " ~ item.name ~ " already started" not in vol_start.stderr) ) 
 
-      #- name: there's more gluster stuff to do and i forgot what it all was
-      #debug:
-      #  msg: do the thing pls
-
-#  no RDMA
-#  looking at dispersed volume
-#  https://docs.gluster.org/en/latest/Administrator-Guide/Setting-Up-Volumes/
-#  can't tell what distributed would add to this
-#  having seven nodes makes it unlikely to have an "optimal" slice size (eg: power of 2)
-#  would like to have replica 2, to survive two nodes being down
-#  this is not mission critical, so it's _fine_
-#  will likely end up going with gluster's suggestion - whatever it might be
-#
+    - name: Mount the volumes
+      ansible.posix.mount:
+        path: '/srv/{{ item.name }}'
+        src: '{{ inventory_hostname }}:/{{ item.name }}'
+        fstype: glusterfs
+        opts: defaults,_netdev
+        state: mounted
+      become: true
+      with_items: '{{ mounts }}'

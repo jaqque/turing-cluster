@@ -1,7 +1,7 @@
 - [x] make filesystems (ext4? xfs? f2fs?)
   - ext4, as per failure mode tests. ext4 was better than f2fs and btrfs. xfs
     unknown.
-- [ ] glusterfs
+- [x] glusterfs
 - [ ] docker
 - [ ] swarm
 - [x] ssh authorized keys

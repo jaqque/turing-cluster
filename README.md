@@ -18,6 +18,7 @@ Playbooks
 ### Setup
 
 - `filesystems.yml`: Create underlying filesystems for gluster
+- `gluster.yml`: Create and mount gluster volumes
 - `hostname.yml`: Set hostname of each compute module, based upon MAC
 - `i2c.yml`: Enable I2C for RTC and power control
 - `localhost.yml`: Set up local environment
@@ -26,7 +27,6 @@ Playbooks
 - `site.ym`: All of the above
 
 ### Control
-
 
 - `poweroff.yml`: Turn off arbitrary node
 - `poweron.yml`: Turn on arbitrary node
