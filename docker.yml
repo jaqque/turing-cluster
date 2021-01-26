@@ -7,6 +7,7 @@
     - docker_apt_key: https://download.docker.com/linux/debian/gpg
     - docker_group: docker
     - docker_cfg_path: /etc/docker/daemon.json
+    - gluster_volume_alias: gluster
 
   tasks:
     - name: Install pre-requisite packages
@@ -64,9 +65,45 @@
         - containerd.service
         - docker.service
 
+    - name: Get docker plugins
+      command:
+        cmd: docker plugin list
+      register: plugin_list
+      check_mode: false
+      changed_when: false
+      tags: doit
+
+    - name: Install gluster volume plugin
+      command:
+        cmd: >
+          docker plugin install
+            --alias {{ gluster_volume_alias }}
+            mochoa/glusterfs-volume-plugin
+            --grant-all-permissions
+            --disable
+      register: plugin
+      changed_when: '"Installed plugin mochoa/glusterfs-volume-plugin" in plugin.stdout'
+      when:
+        - 'gluster_volume_alias ~ ":latest" not in plugin_list.stdout'
+        - not ansible_check_mode
+      notify:
+        - Set Volume Servers
+        - Enable Volume Plugin
+      tags: doit
+
+
+
   handlers:
     - name: Restart Docker
       service:
         name: docker.service
         state: restarted
       become: true
+
+    - name: Set Volume Servers
+      command:
+        cmd: docker plugin set {{ gluster_volume_alias }} SERVERS={{ inventory_hostname }}
+
+    - name: Enable Volume Plugin
+      command:
+        cmd: docker plugin enable {{ gluster_volume_alias }}
