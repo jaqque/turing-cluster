@@ -27,3 +27,4 @@
   - using --limit is ideal
 - [ ] Improve collection / role reporting
 - [ ] Role-ify the things that could(should) be roles
+- [ ] Rebuild the glusterfs docker volume plugin for aarch64
