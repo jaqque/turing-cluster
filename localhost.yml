@@ -23,7 +23,7 @@
       with_items:
         - { section: defaults, option: forks, value: 7 }
         - { section: defaults, option: gathering, value: smart }
-        - { section: defaults, option: inventory, value: hosts }
+        - { section: defaults, option: inventory, value: environments/cluster/hosts }
         - { section: defaults, option: stdout_callback, value: debug }
         - { section: defaults, option: vault_password_file, value: '{{ ansible_user_dir }}/.ansible-vault-password' }
 
