@@ -40,7 +40,7 @@
     - name: Add nodes to /etc/hosts
       lineinfile:
         path: /etc/hosts
-        regexp: '^({{ hostvars[ item ].ansible_default_ipv4.address }}\s+)'
+        regexp: '\s+{{ item }}$'
         line: '{{ hostvars[ item ].ansible_default_ipv4.address }} {{ item }}'
         state: present
       become: true
