@@ -12,6 +12,16 @@
           | regex_replace (":","")
         }}'
       check_mode: false
+      when: mac is defined
+
+    - name: Make hostname from IP address
+      set_fact:
+        hostname: 'node{{
+          ansible_facts[ ansible_default_ipv4.alias][ "ipv4" ][ "address" ]
+          | regex_replace ("^.*(.)$","\1")
+        }}'
+      check_mode: false
+      when: mac is not defined
 
     - name: Set hostname
       hostname:
