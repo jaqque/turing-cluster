@@ -9,7 +9,7 @@
         name: '*'
         update_cache: true
         state: latest
-        autoclean: treu
+        autoclean: true
         autoremove: true
       become: true
 
