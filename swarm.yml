@@ -1,0 +1,80 @@
+---
+
+- name: Create Docker Swarm Cluster
+  hosts: all
+
+  vars:
+    required_packages:
+      - python3-docker
+    managers_required: 3
+
+  tasks:
+
+    - name: Install Required Packages
+      package:
+        name: '{{ required_packages }}'
+        state: present
+      become: true
+
+    - name: Get Manager Status
+      community.docker.docker_host_info:
+      register: manager
+
+    - name: Separate Managers from Nodes
+      group_by:
+        key: is_manager_{{ manager.host_info.Swarm.ControlAvailable }}
+      changed_when: false
+
+    # if the play hosts lack a manager, but includes a node that is part of a swarm,
+    # it is possible for that node to be selected to create the swarm. that will fail.
+    # solution: don't do that.
+    - name: Elect a Manager if None
+      debug: 
+        msg: 'You are the lucky one, {{ item }}'
+      with_random_choice: '{{ ansible_play_hosts }}'
+      run_once: true
+      register: lucky
+      when: groups.is_manager_True is undefined
+
+    - name: Create Manager
+      community.docker.docker_swarm:
+        state: present
+      register: new_manager
+      run_once: true
+      delegate_to: '{{ lucky.results[0].item }}'
+      when: groups.is_manager_True is undefined
+
+    - name: Get Swarm Info
+      community.docker.docker_swarm_info:
+      register: manager
+      run_once: true
+      delegate_to: '{{ groups.is_manager_True[0] }}'
+      when: groups.is_manager_True is defined
+
+    - name: Join the Swarm
+      community.docker.docker_swarm:
+        state: join
+        # get join token from either new or existing manager
+        join_token: '{{ (  groups.is_manager_True is undefined )
+          | ternary ( new_manager.swarm_facts.JoinTokens.Worker|default(""), 
+            manager.swarm_facts.JoinTokens.Worker ) }}'
+        # get remote address from either new or existing manager
+        remote_addrs: '{{ (  groups.is_manager_True is undefined )
+          | ternary ( lucky.results[0].item, groups.is_manager_True[0] ) }}'
+      register: swarm
+
+    # TODO: use ID instead of hostname
+    - name: Promote Managers
+      community.docker.docker_node:
+        hostname: '{{ item }}'
+        role: manager
+      delegate_to: '{{ groups.is_manager_True is defined 
+        | ternary (groups.is_manager_True[0]|default(""), lucky.results[0].item) }}'
+      # get top X of randomized list of nodes, to create required number of managers
+      # (list_of_nodes | shuffle)[0:2] // assuming three managers required, and only one existing
+      # the second ternary handles the case of two or more existing managers
+      with_items: '{{ (groups.is_manager_False | shuffle)[(groups.is_manager_True is defined
+        | ternary ((groups.is_manager_True|default([]))|length - 1, 0)):managers_required|int - 1] }}'
+      when: (groups.is_manager_True|default([]))|length < managers_required|int
+      run_once: true
+      ignore_errors: '{{ ansible_check_mode }}'
