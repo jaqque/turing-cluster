@@ -91,7 +91,19 @@
         - Enable Volume Plugin
       tags: doit
 
-
+    # We can safely assume that cmdline.txt will never be blank/empty/missing
+    - name: Adjust cmdline.txt
+      lineinfile:
+        path: /boot/cmdline.txt
+        regexp: '^(.*?)( {{ item }}(.*)|)$'
+        line: '\1 {{ item }}\3'
+        backrefs: true
+      become: true
+      with_items:
+        - cgroup_enable=memory 
+        - cgroup_memory=1 
+        - swapaccount=1
+      notify: Mark for Reboot
 
   handlers:
     - name: Restart Docker
@@ -107,3 +119,9 @@
     - name: Enable Volume Plugin
       command:
         cmd: docker plugin enable {{ gluster_volume_alias }}
+
+    - name: Mark for Reboot
+      file:
+        path: /var/run/reboot-required
+        state: touch
+      become: true

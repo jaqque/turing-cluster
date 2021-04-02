@@ -9,7 +9,7 @@
   - [ ] ~~set up storage driver~~ skipped, for now
   - [ ] set up volume plugin
   - [x] set up logging driver
-- [ ] swarm
+- [x] swarm
 - [x] ssh authorized keys
 - [x] update pi password
 - [x] adjust sshd config NB: 2020-01-17 i forgot what i wanted to adjust on this
