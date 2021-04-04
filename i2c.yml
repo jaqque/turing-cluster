@@ -33,7 +33,7 @@
       when: get_i2c.stdout != "0"
       changed_when: get_i2c.stdout != "0"
       become: true
-      notify: Reboot Node
+      notify: Mark for Reboot
 
     - name: Install I2C Tools
       package:
@@ -42,6 +42,8 @@
       become: true
 
   handlers:
-    - name: Reboot Node
-      reboot:
+    - name: Mark for Reboot
+      file:
+        path: /var/run/reboot-required
+        state: touch
       become: true

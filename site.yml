@@ -9,3 +9,4 @@
 - import_playbook: docker.yml
 - import_playbook: swarm.yml
 - import_playbook: i2c.yml
+- import_playbook: reboot.yml

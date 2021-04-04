@@ -36,30 +36,47 @@
       delegate_to: '{{ (inventory_hostname == "node1") | ternary ( "node2", "node1" ) }}'
       changed_when: '"already in peer list" not in pool.stdout'
 
+    # TODO: make this a try/catch block. I mean, when you have the time and the inclination.
+    # TODO: make a github bug on this
+    - name: Get Volume Status
+      command:
+        cmd: >
+          gluster
+            volume status {{ item.name }}
+            fd
+      become: true
+      run_once: true
+      with_items: '{{ mounts }}'
+      register: volume_status
+      changed_when: false
+      failed_when: false
+      check_mode: false
+
     - name: Create volumes
       command:
         cmd: >
-          gluster 
-            volume create {{ item.name }}
-            disperse 7 
+          gluster
+            volume create {{ item.item.name }}
+            disperse 7
             redundancy 3
             transport tcp
             {{
-              ansible_play_hosts 
+              ansible_play_hosts
               | join (
-                  ":" ~ gluster_path | regex_replace ("%%item%%", item.name) ~ " "
-              ) ~ ":" ~ gluster_path | regex_replace ("%%item%%", item.name) 
+                  ":" ~ gluster_path | regex_replace ("%%item%%", item.item.name) ~ " "
+              ) ~ ":" ~ gluster_path | regex_replace ("%%item%%", item.item.name)
             }}
       # "node1:/path/vol/brick node2:/path/vol/brick"
       # redundancy 3 is optimal, according to glusterfs
       become: true
       run_once: true
-      with_items: '{{ mounts }}'
+      with_items: '{{ volume_status.results }}'
       register: volumes
       changed_when: '"please start the volume to access data" in volumes.stdout'
       failed_when: >
         ( volumes.rc != 0 )
-        and ( volumes.rc == 1 and ("Volume " ~ item.name ~ " already exists" not in volumes.stderr) ) 
+        and ( volumes.rc == 1 and ("Volume " ~ item.item.name ~ " already exists" not in volumes.stderr) )
+      when: item.rc != 0
 
     - name: Start the gluster volumes
       command:
@@ -71,7 +88,7 @@
       changed_when: "'volume start: ' ~ item.name ~ ': success' in vol_start.stdout"
       failed_when: >
         ( vol_start.rc != 0 )
-        and ( vol_start.rc == 1 and ("Volume " ~ item.name ~ " already started" not in vol_start.stderr) ) 
+        and ( vol_start.rc == 1 and ("Volume " ~ item.name ~ " already started" not in vol_start.stderr) )
 
     - name: Mount the volumes
       ansible.posix.mount:
