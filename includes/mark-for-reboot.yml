@@ -4,4 +4,8 @@
   lineinfile:
     path: /var/run/reboot-required
     line: '{{ reason | default ("Ansible Requested") }}'
+    mode: 0444
+    owner: root
+    group: root
+    create: true
     state: present
