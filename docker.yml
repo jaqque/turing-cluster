@@ -46,6 +46,9 @@
           {
             "log-driver": "local"
           }
+        mode: 0644
+        owner: root
+        group: root
       become: true
       notify: Restart Docker
 
