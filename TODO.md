@@ -27,6 +27,7 @@
   - using --limit is ideal
 - [ ] power status accept individual nodes / groups / ranges
   - using --limit is ideal
+- [x] Disable unnecessary services
 - [ ] Improve collection / role reporting
 - [ ] Role-ify the things that could(should) be roles
 - [ ] Rebuild the glusterfs docker volume plugin for aarch64

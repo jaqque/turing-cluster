@@ -1,0 +1,23 @@
+---
+
+- name: Stop unnecessary services
+  hosts: all
+
+  vars:
+    services:
+      - alsa-state
+      - colord
+      - cups-browsed
+      - cups
+      - triggerhappy
+      - unattended-upgrades
+      - wpa_supplicant
+
+  tasks:
+    - name: Stop / Disable Service
+      service:
+        name: '{{ item }}'
+        state: stopped
+        enabled: false
+      become: true
+      with_items: '{{ services }}'

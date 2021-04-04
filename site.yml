@@ -4,6 +4,7 @@
 - import_playbook: hostname.yml
 - import_playbook: passwd.yml
 - import_playbook: ssh_keys.yml
+- import_playbook: unnecessary-services.yml
 - import_playbook: filesystems.yml
 - import_playbook: gluster.yml
 - import_playbook: docker.yml
