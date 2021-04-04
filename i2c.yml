@@ -43,11 +43,6 @@
 
   handlers:
     - name: Mark for Reboot
-      file:
-        path: /var/run/reboot-required
-        state: touch
-      become: true
-    - name: Mark for Reboot
       include: includes/mark-for-reboot.yml
       vars:
         reason: 'Enable I2C'
