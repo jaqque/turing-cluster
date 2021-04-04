@@ -3,6 +3,7 @@
     unknown.~~
   - XFS. Gluster is happier that way. I am happier that way.
 - [x] glusterfs
+- [ ] Idempotify gluster (can't create an existing volume)
 - [ ] docker
   - [x] install docker
   - [x] enable/run docker
@@ -10,6 +11,7 @@
   - [ ] set up volume plugin
   - [x] set up logging driver
 - [x] swarm
+- [ ] adjust swarm's idempotency (when in a swarm, tries to manage it)
 - [x] ssh authorized keys
 - [x] update pi password
 - [x] adjust sshd config NB: 2020-01-17 i forgot what i wanted to adjust on this
