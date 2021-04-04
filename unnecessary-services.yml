@@ -5,11 +5,10 @@
 
   vars:
     services:
-      - alsa-state
-      - colord
       - cups-browsed
       - cups
       - triggerhappy
+      - triggerhappy.socket
       - unattended-upgrades
       - wpa_supplicant
 
@@ -21,3 +20,23 @@
         enabled: false
       become: true
       with_items: '{{ services }}'
+
+    - name: Disable sound hardware / blacklist kernel module
+      copy:
+        dest: /etc/modprobe.d/blacklist-{{ item }}.conf
+        content: >
+          blacklist {{ item }}
+        mode: 0644
+        owner: root
+        group: root
+      become: true
+      with_items:
+        - snd_bcm2835
+      notify: Mark for Reboot
+
+  handlers:
+    - name: Mark for Reboot
+      include: includes/mark-for-reboot.yml
+      vars:
+        reason: 'Disable sound kernel module'
+      become: true
