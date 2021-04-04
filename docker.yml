@@ -124,7 +124,7 @@
         cmd: docker plugin enable {{ gluster_volume_alias }}
 
     - name: Mark for Reboot
-      file:
-        path: /var/run/reboot-required
-        state: touch
+      include: includes/mark-for-reboot.yml
+      vars:
+        reason: 'Append cgroup paramters to cmdline.txt'
       become: true

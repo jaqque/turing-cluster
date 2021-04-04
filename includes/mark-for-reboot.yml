@@ -1,0 +1,7 @@
+---
+
+- name: Mark for Reboot
+  lineinfile:
+    path: /var/run/reboot-required
+    line: '{{ reason | default ("Ansible Requested") }}'
+    state: present
