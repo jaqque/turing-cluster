@@ -9,11 +9,6 @@
       - glusterfs-client # each system will be a client, as well
       - glusterfs-server
 
-  pre_tasks:
-    - name: Gathering Facts
-      setup:
-      when: module_setup is not defined
-
   tasks:
     - name: Install glusterfs
       package:
