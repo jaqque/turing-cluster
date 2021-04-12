@@ -1,0 +1,32 @@
+---
+
+- name: Initialize keepalived
+  hosts: all
+
+  vars:
+    repository: jaqque
+    image: keepalived
+    tag: 2.1.5
+    image_name: '{{ repository }}/{{ image }}:{{ tag }}'
+
+  tasks:
+    - name: Load the image
+      community.docker.docker_image:
+        name: '{{ image_name }}'
+        source: load
+        load_path: '/srv/store/containers/{{ image }}-{{ tag }}.tar'
+
+    - name: keepalive the swarm
+      community.docker.docker_container:
+        name: keepalived
+        image: '{{ image_name }}'
+        capabilities:
+          - NET_ADMIN
+          - NET_BROADCAST
+          - NET_RAW
+        cpus: '0.50'
+        memory: '50M'
+        restart_policy: unless-stopped
+        network_mode: host
+        container_default_behavior: no_defaults
+        state: started

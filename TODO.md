@@ -31,5 +31,5 @@
 - [ ] Improve collection / role reporting
 - [ ] Role-ify the things that could(should) be roles
 - [ ] Rebuild the glusterfs docker volume plugin for aarch64
-- [ ] Set keepalived across the swarm
+- [x] Set keepalived across the swarm
 - [ ] Operate local container repository

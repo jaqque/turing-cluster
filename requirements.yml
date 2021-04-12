@@ -3,6 +3,8 @@
 collections:
   - name: community.general
     version: 1.3.4
+  - name: community.docker
+    version: 1.4.0
 
   # these are dependencies of community.general
   # https://github.com/ansible-collections/community.general/blob/main/galaxy.yml
