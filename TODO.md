@@ -32,4 +32,6 @@
 - [ ] Role-ify the things that could(should) be roles
 - [ ] Rebuild the glusterfs docker volume plugin for aarch64
 - [x] Set keepalived across the swarm
+- [x] CIFS
+- [ ] Find a way to get a playbook to deploy a container via compose file without transfering said compose file
 - [ ] Operate local container repository

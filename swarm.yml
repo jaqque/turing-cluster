@@ -6,6 +6,8 @@
   vars:
     required_packages:
       - python3-docker
+      - python3-jsondiff
+      - python3-yaml
     managers_required: 3
 
   tasks:

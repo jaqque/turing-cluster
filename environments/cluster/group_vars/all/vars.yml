@@ -26,3 +26,6 @@ docker_packages:
   - containerd.io
   - docker-ce
   - docker-ce-cli
+
+cifs_user: jaqque
+cifs_password: '{{ vault_cifs_password }}'

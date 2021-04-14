@@ -1,0 +1,62 @@
+---
+
+- name: 'Deploy Docker Stack Pt IV: A New Manager'
+  hosts: all
+
+  tasks:
+    - name: Get Docker Manager status
+      community.docker.docker_host_info:
+      register: manager
+      when: manager is undefined
+
+    - name: "group 'em"
+      group_by:
+        key: is_manager_{{ manager.host_info.Swarm.ControlAvailable }}
+      changed_when: false
+
+- name: 'Deploy Docker Stack Pt V: Return of the Service'
+  hosts: is_manager_True
+  tasks:
+    - name: I am your Swarm
+      community.docker.docker_stack:
+        name: cifs
+        # no stack_name? take the suffixless basename of the compose_file
+        # While I could use | basename, I would still need regex_replace
+        # Please see https://blog.codinghorror.com/regular-expressions-now-you-have-two-problems/
+        compose: 
+          - version: "3.9"
+            services:
+              cifs:
+                image: dperson/samba
+                deploy:
+                  mode: replicated
+                  replicas: 1
+                environment:
+                  GROUPID: 1000
+                  NMBD: 1
+                  PERMISSIONS: 1
+                  RECYCLE: 0
+                  SHARE1: tigger;/public;yes;no;yes
+                  SHARE2: jaqque;/private;no;no;no;jaqque
+                  TZ: PST8PDT
+                  USERID: 1000
+                  USER: '{{ cifs_user }};{{ cifs_password }}'
+                  WORKGROUP: WORKGROUP
+                ports: 
+                  - '137:137/udp'
+                  - '138:138/udp'
+                  - '139:139'
+                  - '445:445'
+                volumes:
+                  - /srv/cifs/public:/public
+                  - /srv/cifs/private:/private
+        state: present
+      run_once: true
+      register: deploy
+
+    - name: Status
+      debug:
+        var: deploy
+
+
+
