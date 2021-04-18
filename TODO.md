@@ -33,5 +33,7 @@
 - [ ] Rebuild the glusterfs docker volume plugin for aarch64
 - [x] Set keepalived across the swarm
 - [x] CIFS
+- [ ] Adjust CIFS to use Docker Secrets for the private share credentials
+  - [ ] Refactor CIFS to use docker stack deploy playbook
 - [ ] Find a way to get a playbook to deploy a container via compose file without transfering said compose file
 - [ ] Operate local container repository
