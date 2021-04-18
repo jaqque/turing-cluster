@@ -1,0 +1,38 @@
+---
+
+- name: 'Docker Stack Deploy: Episode IV - A New Manager'
+  hosts: all
+
+  tasks:
+    - name: "Help me, swarm manager. You’re my only hope."
+      community.docker.docker_host_info:
+      register: manager
+      when: manager is undefined
+
+    - name: "These aren't the nodes you're looking for."
+      group_by:
+        key: is_manager_{{ manager.host_info.Swarm.ControlAvailable }}
+      changed_when: false
+
+- name: 'Docker Stack Deploy: Pt V - Return of the Service'
+  hosts: is_manager_True
+  tasks:
+    - name: 'No, I am your stack.'
+      community.docker.docker_stack:
+        name: '{{ stack_name | default ( compose_file | regex_replace( ".*/([^.]*)\..*", "\1" ) ) }}'
+        # no stack_name? take the suffixless basename of the compose_file
+        # While I could use | basename, I would still need regex_replace
+        # Please see https://blog.codinghorror.com/regular-expressions-now-you-have-two-problems/
+        compose: 
+          - '{{ item }}'
+        state: present
+      run_once: true
+      with_items:
+        - '{{ lookup("file",compose_file)|from_yaml }}'
+      when:
+        - compose_file is defined
+      register: deploy
+
+    - name: 'Hello, what have we here?'
+      debug:
+        var: deploy
