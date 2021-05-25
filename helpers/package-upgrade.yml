@@ -15,8 +15,9 @@
 
     - name: Clean apt's cache
       command: apt-get clean
+      args:
+        warn: false
       become: true
-      warn: false
 
 - name: Reboot
   hosts: all
