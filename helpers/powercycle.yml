@@ -1,0 +1,28 @@
+---
+
+- name: Poweroff a node
+  hosts: localhost
+  gather_facts: false
+
+  tasks:
+    - name: Ensure node to powercycle is defined
+      assert:
+        that: node is defined
+        fail_msg: 'Please define node. Ex: "-e node=node1"'
+        success_msg: Power cycling {{ node | default() }}
+
+- import_playbook: poweroff.yml
+
+- import_playbook: poweron.yml
+
+- name: Wait for host
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: Wait for {{ node }} to boot
+      command: 'env ANSIBLE_CONFIG="{{ ansible_config_file }}" ansible -m ping {{ node }}'
+      register: ping
+      until: ping.rc == 0
+      retries: 50
+      delay: 5
