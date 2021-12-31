@@ -1,6 +1,6 @@
 ---
 
-- name: Poweroff a node
+- name: Poweron a node
   hosts: localhost
   gather_facts: false
 
