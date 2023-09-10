@@ -42,3 +42,6 @@
 - [ ] Add python virtual environment requirements file
 - [ ] Venv creation script (I like naming the virtual env something useful)
   - not strictly necessary, but it's useful to me
+- [ ] Make these actual issues
+  - I know better than to think I actually look at the issues - this TODO
+    is part of the repo, so is not git repository hosting specific
