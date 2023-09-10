@@ -18,6 +18,7 @@
       args:
         warn: false
       become: true
+      changed_when: false
 
 - name: Reboot
   hosts: all
