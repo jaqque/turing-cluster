@@ -23,6 +23,8 @@
   - so long as collection: is never defined in a playbook, it won't be a big
     problem. it will become a problem later when ansible changes how it does
     things. again.
+  - VScode does a good job of reporting what collection something is in
+  - newer versions of ansible-lint do too
 - [ ] power on/off accept groups/ranges as well as individual.
   - using --limit is ideal
 - [ ] power status accept individual nodes / groups / ranges
@@ -37,3 +39,6 @@
   - [ ] Refactor CIFS to use docker stack deploy playbook
 - [ ] Find a way to get a playbook to deploy a container via compose file without transfering said compose file
 - [ ] Operate local container repository
+- [ ] Add python virtual environment requirements file
+- [ ] Venv creation script (I like naming the virtual env something useful)
+  - not strictly necessary, but it's useful to me
