@@ -15,7 +15,7 @@
 - [x] ssh authorized keys
 - [x] update pi password
 - [x] adjust sshd config NB: 2020-01-17 i forgot what i wanted to adjust on this
-  - I am assuning I wanted to disable root passwords for sshd. that is the
+  - I am assuming I wanted to disable root passwords for sshd. that is the
     default
 - [ ] Fully qualify all the tasks
 - [ ] Find a better way to determine the FQCN a given task is in
@@ -47,6 +47,7 @@
     is part of the repo, so is not git repository hosting specific
 - [x] Monitor the temperature
   - could use syslog
+- [ ] Integrate netdata (it works on the pi4)
 - [ ] Think about investigating a more proper monitoring solution
   - Gotta be like super lightweight, these are pi's we are talking about
 - [ ] Exfiltrate mail ?
