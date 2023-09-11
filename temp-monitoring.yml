@@ -1,0 +1,21 @@
+---
+
+- name: Install Temperature Monitoring
+  hosts: all
+
+  vars:
+    get_temperature: '/usr/bin/vcgencmd measure_temp'
+    job_tag: 'TEMP'
+    syslogger: '/usr/bin/logger -p info -t {{ job_tag }}'
+    cron_user: 'pi'
+
+  tasks:
+    # vcgencmd measure_temp | logger -p info -t TEMP
+    - name: Add SoC Temperature Monitoring to cron
+      ansible.builtin.cron:
+        name: 'SoC temperature monitoring'
+        job: '{{ get_temperature }} 2>&1 | {{ syslogger }}'
+        # special_time: 'hourly'
+        minute: '*/5'
+      become: '{{ ansible_user_id != cron_user }}'
+      become_user: '{{ cron_user }}'
