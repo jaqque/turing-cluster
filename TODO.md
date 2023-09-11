@@ -45,10 +45,10 @@
 - [ ] Make these actual issues
   - I know better than to think I actually look at the issues - this TODO
     is part of the repo, so is not git repository hosting specific
-- [x] monitor the temperature
+- [x] Monitor the temperature
   - could use syslog
-- [ ] think about investigating a more proper monitoring solution
-  - gotta be like super lightweight, these are pi's we are talking about
-- [ ] exfiltrate mail ?
-  - or set up crontabs with the MAILTO=''
-- [ ] bypass git pre-commit hooks if no yaml/playbook files are affected
+- [ ] Think about investigating a more proper monitoring solution
+  - Gotta be like super lightweight, these are pi's we are talking about
+- [ ] Exfiltrate mail ?
+  - Or set up crontabs with the MAILTO=''
+- [ ] Bypass git pre-commit hooks if no yaml/playbook files are affected
