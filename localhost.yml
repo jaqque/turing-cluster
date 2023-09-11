@@ -13,6 +13,14 @@
         dest: '{{ ansible_cfg  }}'
         creates: '{{ ansible_cfg }}'
 
+    - name: Add do-not-edit reminder
+      ansible.builtin.lineinfile:
+        path: '{{ ansible_cfg }}'
+        line: |
+          # Ansible Managed - DO NOT EDIT
+        insertbefore: 'BOF'
+        state: present
+
     - name: Override defaults
       community.general.ini_file:
         path: '{{ ansible_cfg }}'
