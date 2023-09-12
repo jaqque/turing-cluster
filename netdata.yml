@@ -1,0 +1,47 @@
+---
+
+- name: Install Netdata (native package)
+  hosts: all
+  force_handlers: true
+
+  tasks:
+
+    - name: Make temporary work directory
+      ansible.builtin.tempfile:
+        state: 'directory'
+        suffix: '.netdata'
+      register: netdata_work
+      notify: Clean Up
+
+    - name: Download installation script
+      ansible.builtin.get_url:
+        url: '{{ netdata_installer_url }}'
+        dest: '{{ netdata_work.path }}'
+        mode: '0555'
+        checksum: '{{ netdata_installer_checksum }}'
+      when: netdata_work.path is defined
+
+    # using the "--repositories-only" flag, only
+    # /etc/apt/sources.list.d/netdata-edge.list would be created
+    - name: Install Netdata
+      ansible.builtin.command:
+        cmd: >
+          {{ netdata_work.path }}/{{ netdata_installer_url | basename }}
+             --non-interactive
+             --release-channel {{ netdata_release_channel }}
+             --auto-update
+             --disable-telemetry
+             --native-only
+             --claim-token {{ netdata_claim_token }}
+             --claim-rooms {{ netdata_claim_rooms }}
+             --claim-url {{ netdata_claim_url }}
+        creates: '{{ netdata_config_pathname }}'
+      become: true
+      when: netdata_work.path is defined
+
+  handlers:
+    - name: Clean Up
+      ansible.builtin.file:
+        path: '{{ netdata_work.path }}'
+        state: absent
+      # when: false

@@ -12,4 +12,5 @@
 - import_playbook: swarm.yml
 - import_playbook: i2c.yml
 - import_playbook: temp-monitoring.yml
+- import_playbook: netdata.yml
 - import_playbook: reboot.yml

@@ -29,3 +29,13 @@ docker_packages:
 
 cifs_user: jaqque
 cifs_password: '{{ vault_cifs_password }}'
+
+# netdata monitoring
+netdata_pathname: '/usr/sbin/netdata'
+netdata_installer_url: 'https://my-netdata.io/kickstart.sh'
+netdata_installer_checksum: 'md5:18f839c20f5389c5f2b3c71025858082'
+netdata_release_channel: 'nightly'
+netdata_claim_token: '{{ vault_netdata_claim_token }}'
+netdata_claim_rooms: '{{ vault_netdata_claim_rooms }}'
+netdata_claim_url: 'https://app.netdata.cloud'
+netdata_config_pathname: '/etc/netdata/netdata.conf'
