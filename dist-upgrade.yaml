@@ -1,0 +1,149 @@
+---
+
+- name: Dist Upgrade
+  hosts: all
+  become: true
+  serial: 1
+
+  vars:
+    distro:
+      from: buster
+      to: bullseye
+
+    sources:
+      buster:
+        - /etc/apt/sources.list
+        - /etc/apt/sources.list.d/docker-ce.list
+        - /etc/apt/sources.list.d/netdata-edge.list
+        - /etc/apt/sources.list.d/raspi.list
+        - /etc/apt/sources.list.d/vscode.list
+      bullseye:
+        - /etc/apt/sources.list
+        - /etc/apt/sources.list.d/docker-ce.list
+        - /etc/apt/sources.list.d/netdata-edge.sources
+        - /etc/apt/sources.list.d/raspi.list
+      bookworm:
+        - /etc/apt/sources.list
+        - /etc/apt/sources.list.d/docker-ce.list
+        - /etc/apt/sources.list.d/netdata-edge.sources
+        - /etc/apt/sources.list.d/raspi.list
+
+  tasks:
+    - name: "Update sources.list and friends"
+      ansible.builtin.replace:
+        path: '{{ item }}'
+        replace: '\g<1>{{ distro.to }}\g<2>'
+        regexp: '(.*){{ distro.from }}(.*)'
+      loop: '{{ sources[ansible_distribution_release] }}'
+
+    - name: Remove non-free-firmware
+      ansible.builtin.replace:
+        path: '{{ item }}'
+        regexp: '( non-free-firmware)'
+      loop: '{{ sources[ansible_distribution_release] }}'
+      when: 'distro.to != "bookworm"'
+
+    - name: Disable security udpates
+      ansible.builtin.lineinfile:
+        path: /etc/apt/sources.list
+        line: '# \g<1>'
+        backrefs: true
+        regexp: '(deb http://deb.debian.org/debian-security/ .*)'
+      when: 'distro.to != "bookworm"'
+
+    - name: Enable security updates
+      ansible.builtin.lineinfile:
+        path: /etc/apt/sources.list
+        line: '\g<1>'
+        backrefs: true
+        regexp: '# (deb http://deb.debian.org/debian-security/ .*)'
+      when: 'distro.to == "bookworm"'
+
+    - name: Add non-free-firmware
+      ansible.builtin.replace:
+        path: '{{ item }}'
+        replace: '\g<1> non-free-firmware'
+        regexp: '( non-free)'
+      loop: '{{ sources[ansible_distribution_release] }}'
+      when: 'distro.to == "bookworm"'
+
+    - name: Run apt-get clean
+      # noqa: command-instead-of-module
+      ansible.builtin.command:
+        cmd: apt-get clean
+      changed_when: false
+      environment:
+        DEBIAN_FRONTEND: noninteractive
+
+    - name: Run apt-get update
+      # noqa: command-instead-of-module
+      ansible.builtin.command:
+        cmd: apt-get update
+      changed_when: false
+      environment:
+        DEBIAN_FRONTEND: noninteractive
+
+    - name: Run apt-get full-upgrade -dy
+      # noqa: command-instead-of-module
+      ansible.builtin.command:
+        cmd: apt-get full-upgrade -dy --no-install-recommends
+      register: download
+      changed_when: "'0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.' not in download.stdout"
+      environment:
+        DEBIAN_FRONTEND: noninteractive
+      notify: Reboot
+
+    - name: Run apt-get upgrade -y
+      # noqa: command-instead-of-module
+      ansible.builtin.command:
+        cmd: apt-get upgrade -y --no-install-recommends -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef
+      register: upgrade
+      changed_when: "'0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.' not in upgrade.stdout"
+      environment:
+        DEBIAN_FRONTEND: noninteractive
+      notify: Reboot
+
+    - name: Run apt-get full-upgrade -y
+      # noqa: command-instead-of-module
+      ansible.builtin.command:
+        cmd: apt-get full-upgrade -y --no-install-recommends -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef
+      register: full_upgrade_one
+      changed_when: "'0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.' not in full_upgrade_one.stdout"
+      environment:
+        DEBIAN_FRONTEND: noninteractive
+      notify: Reboot
+
+    - name: Run apt-get autoremove
+      # noqa: command-instead-of-module
+      ansible.builtin.command:
+        cmd: apt-get autoremove -y
+      register: autoremove_one
+      changed_when: "'0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.' not in autoremove_one.stdout"
+      environment:
+        DEBIAN_FRONTEND: noninteractive
+      notify: Reboot
+
+    - name: Run apt-get full-upgrade -y, again!
+      # noqa: command-instead-of-module
+      ansible.builtin.command:
+        cmd: apt-get full-upgrade -y --no-install-recommends -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef
+      register: full_upgrade_two
+      changed_when: "'0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.' not in full_upgrade_two.stdout"
+      environment:
+        DEBIAN_FRONTEND: noninteractive
+      notify: Reboot
+
+    - name: Run apt-get autoremove, again also!
+      # noqa: command-instead-of-module
+      ansible.builtin.command:
+        cmd: apt-get autoremove -y
+      register: autoremove_two
+      changed_when: "'0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.' not in autoremove_two.stdout"
+      environment:
+        DEBIAN_FRONTEND: noninteractive
+      notify: Reboot
+
+  handlers:
+
+    - name: Reboot
+      ansible.builtin.reboot:
