@@ -1,0 +1,33 @@
+---
+
+- name: Install the Stand-alone Shell
+  hosts: all
+
+
+  tasks:
+    - name: Install sash package
+      ansible.builtin.package:
+        name: sash
+        state: present
+      become: true
+
+    - name: Add sashroot group
+      ansible.builtin.group:
+        name: sashroot
+        gid: 0
+        non_unique: true
+        state: present
+      become: true
+
+    - name: Add sashroot user
+      ansible.builtin.user:
+        name: sashroot
+        comment: sash user
+        create_home: false
+        group: sashroot
+        home: '/root'
+        non_unique: true
+        shell: '/bin/sash'
+        state: present
+        uid: 0
+      become: true
