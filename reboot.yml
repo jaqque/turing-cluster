@@ -8,7 +8,7 @@
     force: false
   tasks:
     - name: Get reboot required status
-      stat:
+      ansible.builtin.stat:
         path: /var/run/reboot-required
       register: reboot_required
 
@@ -21,17 +21,16 @@
 #       when: manager is undefined
 #     - block:
 #       - name: Pick and Promote Manager
-#         debug: 
+#         debug:
 #           msg: I choose you, Pikachu!
 #       - name: Demote Manager
 #         debug:
 #           msg: I am a manager. Demote me.
 #       when: manager.host_info.Swarm.ControlAvailable
 #     when:
-#       - reboot_required.stat.exists or force|bool
+#       - reboot_required.stat.exists or force | bool
 
     - name: Reboot
-      reboot:
+      ansible.builtin.reboot:
       become: true
-      when: reboot_required.stat.exists or force|bool
-
+      when: reboot_required.stat.exists or force | bool

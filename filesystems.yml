@@ -11,7 +11,7 @@
 
   tasks:
     - name: Install XFS
-      package:
+      ansible.builtin.package:
         name: xfsprogs
         state: present
       become: true
@@ -27,8 +27,8 @@
 
     - name: Mount filesystems
       ansible.posix.mount:
-        path: '{{ gluster_path | regex_replace ("%%item%%", item.name) | dirname }}'
-        src: '{{ (item.label is defined) | ternary ( "LABEL=" ~ (item.label|default(omit)), item.dev) }}'
+        path: '{{ gluster_path | regex_replace("%%item%%", item.name) | dirname }}'
+        src: '{{ (item.label is defined) | ternary( "LABEL=" ~ (item.label|default(omit)), item.dev) }}'
         fstype: '{{ fstype }}'
         opts: defaults,noatime
         state: mounted

@@ -8,9 +8,9 @@
 
   tasks:
     - name: Get upstream ansible.cfg
-      ansible.legacy.uri:
+      ansible.builtin.uri:
         url: https://raw.githubusercontent.com/ansible/ansible/v{{ ansible_version.string }}/examples/ansible.cfg
-        dest: '{{ ansible_cfg  }}'
+        dest: '{{ ansible_cfg }}'
         creates: '{{ ansible_cfg }}'
 
     - name: Add do-not-edit reminder
@@ -37,16 +37,16 @@
         - { section: defaults, option: vault_password_file, value: '{{ ansible_user_dir }}/.ansible-vault-password' }
 
     - name: Install required collections and roles
-      command:
+      ansible.builtin.command:
         cmd: ansible-galaxy install -r requirements.yml
         chdir: '{{ playbook_dir }}'
       changed_when: '"was installed successfully" in galaxy.stdout'
       register: galaxy
-      #notify: Installed Collections and Roles
+      # notify: Installed Collections and Roles
 
   handlers:
     - name: Installed Collections and Roles
-      debug:
+      ansible.builtin.debug:
         msg: '{{ item }}'
       when: '"was installed successfully" in item'
       with_items: '{{ galaxy.stdout_lines }}'

@@ -5,8 +5,11 @@
   gather_facts: false
 
   tasks:
-    - name: Install keys for pi user
-      authorized_key:
-        user: pi
+    - name: Install keys for users
+      ansible.posix.authorized_key:
+        user: '{{ item }}'
         key: '{{ lookup("file", lookup("env", "HOME") ~ "/.ssh/authorized_keys") }}'
       become: true
+      loop:
+        - pi
+        - sashroot

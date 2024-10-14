@@ -5,8 +5,8 @@
   gather_facts: false
 
   tasks:
-    - name: set pi password
-      user:
+    - name: Set pi password
+      ansible.builtin.user:
         name: pi
         password: '{{ crypted_password }}'
       become: true

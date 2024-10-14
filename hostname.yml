@@ -5,31 +5,31 @@
 
   tasks:
     - name: Make hostname from MAC address
-      set_fact:
+      ansible.builtin.set_fact:
         hostname: '{{
-          ansible_facts[ ansible_default_ipv4.alias][ "macaddress" ]
-          | regex_replace ("^.* ","")
-          | regex_replace (":","")
+          ansible_facts[ansible_default_ipv4.alias]["macaddress"]
+          | regex_replace("^.* ", "")
+          | regex_replace(":", "")
         }}'
       check_mode: false
       when: mac is defined
 
     - name: Make hostname from IP address
-      set_fact:
+      ansible.builtin.set_fact:
         hostname: 'node{{
-          ansible_facts[ ansible_default_ipv4.alias][ "ipv4" ][ "address" ]
-          | regex_replace ("^.*(.)$","\1")
+          ansible_facts[ansible_default_ipv4.alias]["ipv4"]["address"]
+          | regex_replace("^.*(.)$", "\1")
         }}'
       check_mode: false
       when: mac is not defined
 
     - name: Set hostname
-      hostname:
+      ansible.builtin.hostname:
         name: '{{ hostname }}'
       become: true
 
     - name: Fix /etc/hosts
-      lineinfile:
+      ansible.builtin.lineinfile:
         path: /etc/hosts
         regexp: '^(127.0.1.1\s+)'
         line: '\1{{ hostname }}'
@@ -38,10 +38,10 @@
       become: true
 
     - name: Add nodes to /etc/hosts
-      lineinfile:
+      ansible.builtin.lineinfile:
         path: /etc/hosts
         regexp: '\s+{{ item }}$'
-        line: '{{ hostvars[ item ].ansible_default_ipv4.address }} {{ item }}'
+        line: '{{ hostvars[item].ansible_default_ipv4.address }} {{ item }}'
         state: present
       become: true
       with_items: '{{ ansible_play_hosts_all }}' # can't grab IPs of failed hosts

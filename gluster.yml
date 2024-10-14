@@ -2,6 +2,7 @@
 
 - name: Create gluster share thingies
   hosts: all
+  strategy: linear
   gather_facts: false
 
   vars:
@@ -11,30 +12,30 @@
 
   tasks:
     - name: Install glusterfs
-      package:
+      ansible.builtin.package:
         name: '{{ gluster_packages }}'
         state: present
       become: true
 
     - name: Enable gluster service
-      service:
+      ansible.builtin.service:
         name: glusterd
         enabled: true
         state: started
       become: true
 
     - name: Create the pool
-      command:
+      ansible.builtin.command:
         cmd: gluster peer probe {{ inventory_hostname }}
       become: true
       register: pool
-      delegate_to: '{{ (inventory_hostname == "node1") | ternary ( "node2", "node1" ) }}'
+      delegate_to: '{{ (inventory_hostname == "node1") | ternary("node2", "node1") }}'
       changed_when: '"already in peer list" not in pool.stdout'
 
     # TODO: make this a try/catch block. I mean, when you have the time and the inclination.
     # TODO: make a github bug on this
-    - name: Get Volume Status
-      command:
+    - name: Get Volume Status # noqa: run-once[task]
+      ansible.builtin.command:
         cmd: >
           gluster
             volume status {{ item.name }}
@@ -47,8 +48,8 @@
       failed_when: false
       check_mode: false
 
-    - name: Create volumes
-      command:
+    - name: Create volumes # noqa: run-once[task]
+      ansible.builtin.command:
         cmd: >
           gluster
             volume create {{ item.item.name }}
@@ -73,8 +74,8 @@
         and ( volumes.rc == 1 and ("Volume " ~ item.item.name ~ " already exists" not in volumes.stderr) )
       when: item.rc != 0
 
-    - name: Start the gluster volumes
-      command:
+    - name: Start the gluster volumes # noqa: run-once[task]
+      ansible.builtin.command:
         cmd: gluster volume start '{{ item.name }}'
       become: true
       with_items: '{{ mounts }}'

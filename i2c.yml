@@ -7,7 +7,7 @@
 
   tasks:
     - name: Add overlays
-      blockinfile:
+      ansible.builtin.blockinfile:
         path: '{{ boot_txt }}'
         state: present
         marker: '# {mark} Turing Pi I2C'
@@ -16,34 +16,33 @@
 
     # This is more fragile than I like.
     - name: Insert blank line before block marker
-      replace:
+      ansible.builtin.replace:
         path: /boot/config.txt
         regexp: "(?<=.\n)(# BEGIN .*$)"
         replace: "\n\\1"
       become: true
 
     - name: Get I2C status
-      command: raspi-config nonint get_i2c
+      ansible.builtin.command: raspi-config nonint get_i2c
       changed_when: false
       check_mode: false
       register: get_i2c
 
     - name: Enable I2C
-      command: raspi-config nonint do_i2c 0
+      ansible.builtin.command: raspi-config nonint do_i2c 0
       when: get_i2c.stdout != "0"
       changed_when: get_i2c.stdout != "0"
       become: true
       notify: Mark for Reboot
 
     - name: Install I2C Tools
-      package:
+      ansible.builtin.package:
         name: i2c-tools
         state: present
       become: true
 
   handlers:
     - name: Mark for Reboot
-      include: includes/mark-for-reboot.yml
+      ansible.builtin.include_tasks: includes/mark-for-reboot.yml
       vars:
         reason: 'Enable I2C'
-      become: true

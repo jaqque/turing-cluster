@@ -16,7 +16,7 @@
         source: load
         load_path: '/srv/store/containers/{{ image }}-{{ tag }}.tar'
 
-    - name: keepalive the swarm
+    - name: Keepalive the swarm
       community.docker.docker_container:
         name: keepalived
         image: '{{ image_name }}'
@@ -30,3 +30,7 @@
         network_mode: host
         container_default_behavior: no_defaults
         state: started
+
+    - name: Use legacy interface names
+      ansible.builtin.debug:
+        msg: Append net.ifnames=0 to /boot/cmdline.txt

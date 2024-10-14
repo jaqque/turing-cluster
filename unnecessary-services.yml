@@ -14,7 +14,7 @@
 
   tasks:
     - name: Stop / Disable Service
-      service:
+      ansible.builtin.service:
         name: '{{ item }}'
         state: stopped
         enabled: false
@@ -22,11 +22,11 @@
       with_items: '{{ services }}'
 
     - name: Disable sound hardware / blacklist kernel module
-      copy:
+      ansible.builtin.copy:
         dest: /etc/modprobe.d/blacklist-{{ item }}.conf
         content: >
           blacklist {{ item }}
-        mode: 0644
+        mode: '0644'
         owner: root
         group: root
       become: true
@@ -36,7 +36,6 @@
 
   handlers:
     - name: Mark for Reboot
-      include: includes/mark-for-reboot.yml
+      ansible.builtin.include_tasks: includes/mark-for-reboot.yml
       vars:
         reason: 'Disable sound kernel module'
-      become: true

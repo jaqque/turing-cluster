@@ -4,26 +4,26 @@
   hosts: all
 
   vars:
-    - docker_apt_key: https://download.docker.com/linux/debian/gpg
-    - docker_group: docker
-    - docker_cfg_path: /etc/docker/daemon.json
-    - gluster_volume_alias: gluster
+    docker_apt_key: https://download.docker.com/linux/debian/gpg
+    docker_group: docker
+    docker_cfg_path: /etc/docker/daemon.json
+    gluster_volume_alias: gluster
 
   tasks:
     - name: Install pre-requisite packages
-      package:
+      ansible.builtin.package:
         name: '{{ docker_prerequisites }}'
         state: present
       become: true
 
     - name: Install Docker Apt Key
-      apt_key:
+      ansible.builtin.apt_key:
         url: '{{ docker_apt_key }}'
         state: present
       become: true
 
     - name: Add Docker Apt Repository
-      apt_repository:
+      ansible.builtin.apt_repository:
         repo: >
           deb [arch=arm64]
           https://download.docker.com/linux/debian
@@ -34,33 +34,33 @@
       become: true
 
     - name: Install Docker Packages
-      package:
+      ansible.builtin.package:
         name: '{{ docker_packages }}'
         state: present
       become: true
 
     - name: Set Docker config
-      copy:
+      ansible.builtin.copy:
         dest: '{{ docker_cfg_path }}'
         content: |
           {
             "log-driver": "local"
           }
-        mode: 0644
+        mode: '0644'
         owner: root
         group: root
       become: true
       notify: Restart Docker
 
     - name: Add unprivileged user to Docker's group
-      user:
+      ansible.builtin.user:
         name: '{{ ansible_user_id }}'
         groups: '{{ docker_group }}'
         append: true
       become: true
 
     - name: Enable Docker Services
-      service:
+      ansible.builtin.service:
         name: '{{ item }}'
         state: started
         enabled: true
@@ -69,7 +69,7 @@
         - docker.service
 
     - name: Get docker plugins
-      command:
+      ansible.builtin.command:
         cmd: docker plugin list
       register: plugin_list
       check_mode: false
@@ -77,7 +77,7 @@
       tags: doit
 
     - name: Install gluster volume plugin
-      command:
+      ansible.builtin.command:
         cmd: >
           docker plugin install
             --alias {{ gluster_volume_alias }}
@@ -96,7 +96,7 @@
 
     # We can safely assume that cmdline.txt will never be blank/empty/missing
     - name: Adjust cmdline.txt
-      lineinfile:
+      ansible.builtin.lineinfile:
         path: /boot/cmdline.txt
         regexp: '^(.*?)( {{ item }}(.*)|)$'
         line: '\1 {{ item }}\3'
@@ -106,25 +106,27 @@
         - cgroup_enable=memory
         - cgroup_memory=1
         - swapaccount=1
+        - net.ifnames=0
       notify: Mark for Reboot
 
   handlers:
     - name: Restart Docker
-      service:
+      ansible.builtin.service:
         name: docker.service
         state: restarted
       become: true
 
     - name: Set Volume Servers
-      command:
+      ansible.builtin.command:
         cmd: docker plugin set {{ gluster_volume_alias }} SERVERS={{ inventory_hostname }}
+      changed_when: true
 
     - name: Enable Volume Plugin
-      command:
+      ansible.builtin.command:
         cmd: docker plugin enable {{ gluster_volume_alias }}
+      changed_when: true
 
     - name: Mark for Reboot
-      include: includes/mark-for-reboot.yml
+      ansible.builtin.include_tasks: includes/mark-for-reboot.yml
       vars:
         reason: 'Append cgroup paramters to cmdline.txt'
-      become: true
