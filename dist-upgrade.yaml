@@ -7,8 +7,10 @@
 
   vars:
     distro:
-      from: buster
-      to: bullseye
+      # from: buster
+      # to: bullseye
+      from: bullseye
+      to: bookworm
 
     sources:
       buster:
@@ -59,11 +61,18 @@
         regexp: '# (deb http://deb.debian.org/debian-security/ .*)'
       when: 'distro.to == "bookworm"'
 
+    - name: Correct security sources
+      ansible.builtin.replace:
+        path: /etc/apt/sources.list
+        replace: '\g<1>{{ distro.to }}-security\g<2>'
+        regexp: '(.*){{ distro.to }}/updates(.*)'
+      when: 'distro.to == "bookworm"'
+
     - name: Add non-free-firmware
       ansible.builtin.replace:
         path: '{{ item }}'
         replace: '\g<1> non-free-firmware'
-        regexp: '( non-free)'
+        regexp: '( non-free)$'
       loop: '{{ sources[ansible_distribution_release] }}'
       when: 'distro.to == "bookworm"'
 
@@ -89,6 +98,16 @@
         cmd: apt-get full-upgrade -dy --no-install-recommends
       register: download
       changed_when: "'0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.' not in download.stdout"
+      environment:
+        DEBIAN_FRONTEND: noninteractive
+      notify: Reboot
+
+    - name: Run apt-get install dpkg
+      # noqa: command-instead-of-module
+      ansible.builtin.command:
+        cmd: apt-get install dpkg -y --no-install-recommends -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef
+      register: upgrade
+      changed_when: "'0 upgraded, 0 newly installed, 0 to remove' not in upgrade.stdout"
       environment:
         DEBIAN_FRONTEND: noninteractive
       notify: Reboot
