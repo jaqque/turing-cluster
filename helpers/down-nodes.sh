@@ -6,8 +6,14 @@ command -v ansible-playbook >/dev/null \
 
 ansible-playbook helpers/ping.yml \
 	| sort \
-	| grep ok=0 \
-	| grep -E '[! ]=1'
+	|  sed -nE '/ok=0/s/ .*( [a-z]+)=1.*/\1/p'
+#	| grep ok=0 \
+#	| grep -E '[! ]=1' # i forget what this line was supposed to do,
+#	# but it somehow silenced the down node reporting
+#	# replaced it with a single sed(1) that renders only the name
+#	# of a down node
+
+exit $?
 
 if [ $? -ne 0 ]; then
 	exit
