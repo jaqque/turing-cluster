@@ -1,0 +1,7 @@
+#!/bin/sh
+
+tmux new-session -d -s turing
+for n in $(seq 1 7); do
+  tmux new-window -d -n node$n ssh sash$n
+done
+echo 'tmux attach -d -t turing'

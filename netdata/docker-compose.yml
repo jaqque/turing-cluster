@@ -1,0 +1,38 @@
+version: '3'
+services:
+  netdata:
+    image: netdata/netdata
+    deploy:
+      mode: global
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 5
+        window: 30s
+    container_name: netdata
+    pid: host
+    network_mode: host
+    # migrate to restart_policy
+    # https://docs.docker.com/compose/compose-file/compose-file-v3/#restart_policy
+    restart: unless-stopped
+    # oh; this won't work - cap_add is ignored in stack deploy; we'll try anyway
+    cap_add:
+      - SYS_PTRACE
+      - SYS_ADMIN
+    # security_opt is ignore for stack deploy
+    security_opt:
+      - apparmor:unconfined
+    volumes:
+      - /srv/store/netdata:/etc/netdata:ro
+      - netdatalib:/var/lib/netdata
+      - netdatacache:/var/cache/netdata
+      - /etc/passwd:/host/etc/passwd:ro
+      - /etc/group:/host/etc/group:ro
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /etc/os-release:/host/etc/os-release:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+volumes:
+  netdatalib:
+  netdatacache:

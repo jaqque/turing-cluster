@@ -1,0 +1,30 @@
+---
+
+
+# docker run --env KEEPALIVED_UNICAST_PEERS="#PYTHON2BASH:['192.168.1.10', '192.168.1.11']" --detach osixia/keepalived:2.0.20
+
+- name: Start keepalived container
+  hosts: all
+
+  tasks:
+    - name: Halt
+      ansible.builtin.assert:
+        that: false
+
+    - name: Launch container
+      ansible.builtin.command:
+        cmd: >
+          docker run
+          --env KEEPALIVED_UNICAST_PEERS="#PYTHON2BASH:[
+          '192.168.1.21',
+          '192.168.1.31',
+          '192.168.1.23',
+          '192.168.1.30',
+          '192.168.1.25',
+          '192.168.1.8',
+          '192.168.1.11']"
+          --detach osixia/keepalived:2.0.20
+      register: keepalived
+      changed_when: true
+
+    # - debug: var=keepalive
