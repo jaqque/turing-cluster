@@ -35,14 +35,17 @@
         key_options: 'command="/usr/bin/hostname",from="::1",restrict'
       become: true
 
+    # TODO: ensure localhost host key is known to ssh
+
     - name: Start the heartbeat
       ansible.builtin.cron:
         name: ssh_heartbeat
         cron_file: ssh_heartbeat
         user: root
         job: >
-          if [ "$(ssh -i {{ ssh_dir }}/{{ key_filename }} ::1 hostname)"
-          != "$(/usr/bin/hostname)" ]; then reboot; fi
+          /bin/sh -c 'if [ "$(ssh -i {{ ssh_dir }}/{{ key_filename }} ::1
+          /usr/bin/hostname)" != "$(/usr/bin/hostname)" ]; then
+          /usr/sbin/reboot; fi'
         day: '*'
         hour: '*'
         minute: '*/5'
@@ -56,7 +59,9 @@
         name: filesystem_heartbeat
         cron_file: filesystem_heartbeat
         user: root
-        job: 'if ! touch /root/.heartbeat; then reboot; fi'
+        job: >
+          /bin/sh -c 'if ! /usr/bin/touch /root/.heartbeat;
+          then /usr/sbin/reboot; fi'
         day: '*'
         hour: '*'
         minute: '*/5'
